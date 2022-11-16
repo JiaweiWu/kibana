@@ -9,13 +9,13 @@ import {
   RuleExecutionStatuses,
   RuleExecutionStatusErrorReasons,
 } from '@kbn/alerting-plugin/common';
-import { getIsExperimentalFeatureEnabled } from '../get_experimental_features';
+import { getIsExperimentalFeatureEnabled } from '../../common/get_experimental_features';
 import { Rule } from '../../types';
 import {
   rulesLastRunOutcomeTranslationMapping,
   rulesStatusesTranslationsMapping,
   ALERT_STATUS_LICENSE_ERROR,
-} from '../../application/sections/rules_list/translations';
+} from '../sections/rules_list/translations';
 
 export const getOutcomeHealthColor = (status: RuleLastRunOutcomes) => {
   switch (status) {

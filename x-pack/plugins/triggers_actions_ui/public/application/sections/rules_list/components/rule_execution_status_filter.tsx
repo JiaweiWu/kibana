@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPopover, EuiFilterButton, EuiFilterSelectItem, EuiHealth } from '@elastic/eui';
 import { RuleExecutionStatuses, RuleExecutionStatusValues } from '@kbn/alerting-plugin/common';
 import { rulesStatusesTranslationsMapping } from '../translations';
-import { getExecutionStatusHealthColor } from '../../../../common/lib';
+import { getExecutionStatusHealthColor } from '../../../lib';
 
 interface RuleExecutionStatusFilterProps {
   selectedStatuses: string[];

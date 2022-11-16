@@ -8,9 +8,9 @@
 import { getRuleHealthColor, getRuleStatusMessage } from './rule_status_helpers';
 import { RuleTableItem } from '../../types';
 
-import { getIsExperimentalFeatureEnabled } from '../get_experimental_features';
+import { getIsExperimentalFeatureEnabled } from '../../common/get_experimental_features';
 
-jest.mock('../get_experimental_features', () => ({
+jest.mock('../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn(),
 }));
 

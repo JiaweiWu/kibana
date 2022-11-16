@@ -10,3 +10,10 @@ export { hasMustacheTokens } from './has_mustache_tokens';
 export { AlertProvidedActionVariables } from './action_variables';
 export { updateActionConnector } from './action_connector_api';
 export { isRuleSnoozed } from './is_rule_snoozed';
+export {
+  getOutcomeHealthColor,
+  getExecutionStatusHealthColor,
+  getRuleHealthColor,
+  getIsLicenseError,
+  getRuleStatusMessage,
+} from './rule_status_helpers';

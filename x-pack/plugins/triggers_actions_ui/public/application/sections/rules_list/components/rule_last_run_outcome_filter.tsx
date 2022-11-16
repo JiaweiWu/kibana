@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPopover, EuiFilterButton, EuiFilterSelectItem, EuiHealth } from '@elastic/eui';
 import { RuleLastRunOutcomes, RuleLastRunOutcomeValues } from '@kbn/alerting-plugin/common';
 import { rulesLastRunOutcomeTranslationMapping } from '../translations';
-import { getOutcomeHealthColor } from '../../../../common/lib';
+import { getOutcomeHealthColor } from '../../../lib';
 
 const sortedRuleLastRunOutcomeValues = [...RuleLastRunOutcomeValues].sort();
 

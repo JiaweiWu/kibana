@@ -20,10 +20,7 @@ import type { RuleEventLogListProps } from './rule_event_log_list';
 import { AlertListItem } from './types';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { suspendedComponentWithProps } from '../../../lib/suspended_component_with_props';
-import {
-  getRuleHealthColor,
-  getRuleStatusMessage,
-} from '../../../../common/lib/rule_status_helpers';
+import { getRuleHealthColor, getRuleStatusMessage } from '../../../lib/rule_status_helpers';
 import RuleStatusPanelWithApi from './rule_status_panel';
 
 const RuleEventLogList = lazy(() => import('./rule_event_log_list'));

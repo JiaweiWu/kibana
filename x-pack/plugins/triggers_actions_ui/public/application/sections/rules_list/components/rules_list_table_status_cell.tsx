@@ -20,7 +20,7 @@ import {
   getRuleHealthColor,
   getIsLicenseError,
   getRuleStatusMessage,
-} from '../../../../common/lib/rule_status_helpers';
+} from '../../../lib/rule_status_helpers';
 
 export interface RulesListTableStatusCellProps {
   rule: RuleTableItem;
