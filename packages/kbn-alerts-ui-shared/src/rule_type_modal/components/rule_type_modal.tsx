@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 import { RuleTypeList } from './rule_type_list';
 import { RuleTypeWithDescription, RuleTypeCountsByProducer } from '../types';
+import { MODAL_SEARCH_PLACEHOLDER } from '../../rule_form/translations';
 
 export interface RuleTypeModalProps {
   onClose: () => void;
@@ -103,12 +104,7 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
                 <EuiSpacer size="m" />
                 <EuiPageHeaderSection style={{ width: isFullscreenPortrait ? '100%' : '50%' }}>
                   <EuiFieldSearch
-                    placeholder={i18n.translate(
-                      'alertsUIShared.components.ruleTypeModal.searchPlaceholder',
-                      {
-                        defaultMessage: 'Search',
-                      }
-                    )}
+                    placeholder={MODAL_SEARCH_PLACEHOLDER}
                     value={searchString}
                     onChange={({ target: { value } }) => onChangeSearch(value)}
                     fullWidth

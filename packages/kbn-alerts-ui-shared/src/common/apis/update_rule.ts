@@ -15,6 +15,7 @@ import { BASE_ALERTING_API_PATH } from '../constants';
 import { transformRule } from '../utils';
 
 export const UPDATE_FIELDS: Array<keyof RuleFormData> = [
+  'actions',
   'name',
   'tags',
   'schedule',
@@ -23,11 +24,39 @@ export const UPDATE_FIELDS: Array<keyof RuleFormData> = [
 ];
 
 export const rewriteUpdateBodyRequest: RewriteResponseCase<RuleFormData> = ({
+  actions,
   alertDelay,
   ...res
 }): any => ({
   ...res,
-  actions: [],
+  actions: actions.map((action) => {
+    const { id, params, uuid } = action;
+    return {
+      ...('group' in action ? { group: action.group } : {}),
+      id,
+      params,
+      ...('frequency' in action
+        ? {
+            frequency: action.frequency
+              ? {
+                  notify_when: action.frequency!.notifyWhen,
+                  throttle: action.frequency!.throttle,
+                  summary: action.frequency!.summary,
+                }
+              : undefined,
+          }
+        : {}),
+      ...('alertsFilter' in action &&
+      Object.values(action.alertsFilter || {}).some((value) => value)
+        ? { alerts_filter: action.alertsFilter }
+        : {}),
+      ...('useAlertDataForTemplate' in action &&
+      typeof action.useAlertDataForTemplate !== 'undefined'
+        ? { use_alert_data_for_template: action.useAlertDataForTemplate }
+        : {}),
+      ...(uuid && { uuid }),
+    };
+  }),
   ...(alertDelay ? { alert_delay: alertDelay } : {}),
 });
 

@@ -6,7 +6,6 @@
  */
 
 import type {
-  SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
@@ -17,6 +16,7 @@ import type {
   AlertsFilterTimeframe,
   RuleAction,
   RuleSystemAction,
+  RuleActionParam,
   RuleTypeParams,
 } from '@kbn/alerting-types';
 
@@ -25,6 +25,7 @@ export type {
   Rule,
   SanitizedRule,
   RuleTypeParams,
+  RuleActionParam,
   RuleActionParams,
   IntervalSchedule,
   RuleActionFrequency,
@@ -69,8 +70,6 @@ export const RuleLastRunOutcomeOrderMap: Record<RuleLastRunOutcomes, number> = {
 };
 
 export type RuleAlertingOutcome = 'failure' | 'success' | 'unknown' | 'warning';
-
-export type RuleActionParam = SavedObjectAttribute;
 
 export type RuleActionAlertsFilterProperty = AlertsFilterTimeframe | RuleActionParam;
 

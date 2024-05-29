@@ -7,3 +7,4 @@
  */
 
 export * from './rule_actions';
+export * from './rule_action_item';

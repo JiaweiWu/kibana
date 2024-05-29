@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectAttributes } from '@kbn/core/server';
+import type { SavedObjectAttribute, SavedObjectAttributes } from '@kbn/core/server';
 import type { Filter } from '@kbn/es-query';
 import type { RuleNotifyWhenType, RRuleParams } from '.';
 
 export type RuleTypeParams = Record<string, unknown>;
 export type RuleActionParams = SavedObjectAttributes;
+export type RuleActionParam = SavedObjectAttribute;
 
 export type IsoWeekday = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 export const ISO_WEEKDAYS: IsoWeekday[] = [1, 2, 3, 4, 5, 6, 7];

@@ -17,13 +17,6 @@ import {
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 import { getValidatedMultiConsumer } from '../utils';
 
-export const VALID_CONSUMERS: RuleCreationValidConsumer[] = [
-  AlertConsumers.LOGS,
-  AlertConsumers.INFRASTRUCTURE,
-  AlertConsumers.STACK_ALERTS,
-  'alerts',
-];
-
 export interface RuleConsumerSelectionProps {
   validConsumers: RuleCreationValidConsumer[];
 }

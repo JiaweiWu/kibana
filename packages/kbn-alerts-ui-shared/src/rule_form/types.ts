@@ -27,7 +27,7 @@ import type {
 } from '@kbn/alerting-types';
 import { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { TypeRegistry } from '../common/type_registry';
-import { RuleTypeWithDescription } from '../common/types';
+import { ActionTypeRegistryContract, RuleTypeWithDescription } from '../common/types';
 
 export type RuleTypeParams = Record<string, unknown>;
 
@@ -118,6 +118,7 @@ export interface RuleFormData<Params extends RuleTypeParams = RuleTypeParams> {
   params: SanitizedRule<Params>['params'];
   schedule: SanitizedRule<Params>['schedule'];
   consumer: SanitizedRule<Params>['consumer'];
+  actions: RuleAction[];
   alertDelay?: SanitizedRule<Params>['alertDelay'];
   notifyWhen?: SanitizedRule<Params>['notifyWhen'];
   ruleTypeId?: SanitizedRule<Params>['ruleTypeId'];
@@ -135,6 +136,7 @@ export interface RuleFormPlugins {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   docLinks: DocLinksStart;
   ruleTypeRegistry: RuleTypeRegistryContract;
+  actionTypeRegistry: ActionTypeRegistryContract;
 }
 
 export interface RuleFormState<Params extends RuleTypeParams = RuleTypeParams> {

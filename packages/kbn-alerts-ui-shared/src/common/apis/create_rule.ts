@@ -16,11 +16,39 @@ import { transformRule } from '../utils';
 export const rewriteCreateBodyRequest: RewriteResponseCase<RuleFormData> = ({
   ruleTypeId,
   alertDelay,
+  actions,
   ...res
 }): any => ({
   ...res,
   rule_type_id: ruleTypeId,
-  actions: [],
+  actions: actions.map((action) => {
+    const { id, params } = action;
+    return {
+      ...('group' in action && action.group ? { group: action.group } : {}),
+      id,
+      params,
+      ...('frequency' in action && action.frequency
+        ? {
+            frequency: {
+              notify_when: action.frequency!.notifyWhen,
+              throttle: action.frequency!.throttle,
+              summary: action.frequency!.summary,
+            },
+          }
+        : {}),
+      ...('alertsFilter' in action &&
+      action.alertsFilter &&
+      Object.values(action.alertsFilter || {}).some((value) => value)
+        ? {
+            alerts_filter: action.alertsFilter,
+          }
+        : {}),
+      ...('useAlertDataForTemplate' in action &&
+      typeof action.useAlertDataForTemplate !== 'undefined'
+        ? { use_alert_data_for_template: action.useAlertDataForTemplate }
+        : {}),
+    };
+  }),
   ...(alertDelay ? { alert_delay: alertDelay } : {}),
 });
 

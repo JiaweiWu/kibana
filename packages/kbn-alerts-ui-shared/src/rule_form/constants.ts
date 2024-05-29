@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { RuleNotifyWhen } from '@kbn/alerting-types';
 import {
   ES_QUERY_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
@@ -39,6 +40,7 @@ export const GET_DEFAULT_FORM_DATA = ({
     consumer,
     ruleTypeId,
     name,
+    actions: [],
   };
 };
 
@@ -54,6 +56,12 @@ export const DEFAULT_VALID_CONSUMERS: RuleCreationValidConsumer[] = [
   'stackAlerts',
   'alerts',
 ];
+
+export const DEFAULT_FREQUENCY = {
+  notifyWhen: RuleNotifyWhen.CHANGE,
+  throttle: null,
+  summary: false,
+};
 
 export const createRuleRoute = '/rule/create/:ruleTypeId' as const;
 export const editRuleRoute = '/rule/edit/:id' as const;

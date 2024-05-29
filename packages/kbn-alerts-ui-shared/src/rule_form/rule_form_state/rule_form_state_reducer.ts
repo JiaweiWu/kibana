@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { RuleAction } from '@kbn/alerting-types';
 import { RuleFormData, RuleFormState } from '../types';
 import { validateRuleBase, validateRuleParams } from '../validation';
 
@@ -63,6 +64,22 @@ export type RuleFormStateReducerAction =
   | {
       type: 'setMetadata';
       payload: Record<string, unknown>;
+    }
+  | {
+      type: 'addAction';
+      payload: RuleAction;
+    }
+  | {
+      type: 'removeAction';
+      payload: string;
+    }
+  | {
+      type: 'setActionProperty';
+      payload: {
+        uuid: string;
+        key: string;
+        value: unknown;
+      };
     };
 
 const getUpdateWithValidation =
@@ -189,6 +206,37 @@ export const ruleFormStateReducer = (
         ...ruleFormState,
         metadata: payload,
       };
+    }
+    case 'addAction': {
+      const { payload } = action;
+      return updateWithValidation(() => ({
+        ...formData,
+        actions: [...formData.actions, payload],
+      }));
+    }
+    case 'removeAction': {
+      const { payload } = action;
+      return updateWithValidation(() => ({
+        ...formData,
+        actions: formData.actions.filter((existingAction) => existingAction.uuid !== payload),
+      }));
+    }
+    case 'setActionProperty': {
+      const {
+        payload: { uuid, key, value },
+      } = action;
+      return updateWithValidation(() => ({
+        ...formData,
+        actions: formData.actions.map((existingAction) => {
+          if (existingAction.uuid === uuid) {
+            return {
+              ...existingAction,
+              [key]: value,
+            };
+          }
+          return existingAction;
+        }),
+      }));
     }
     default: {
       return ruleFormState;

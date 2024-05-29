@@ -55,11 +55,13 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
 
   const onSaveClick = useCallback(() => {
     if (isEdit) {
-      onSave();
-    } else {
-      setShowCreateConfirmation(true);
+      return onSave();
     }
-  }, [isEdit, onSave]);
+    if (formData.actions.length !== 0) {
+      return onSave();
+    }
+    setShowCreateConfirmation(true);
+  }, [isEdit, formData, onSave]);
 
   const onCreateConfirmClick = useCallback(() => {
     setShowCreateConfirmation(false);

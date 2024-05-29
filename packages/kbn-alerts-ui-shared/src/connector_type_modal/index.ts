@@ -6,9 +6,4 @@
  * Side Public License, v 1.
  */
 
-export const ALERTS_FEATURE_ID = 'alerts';
-export const BASE_ALERTING_API_PATH = '/api/alerting';
-export const BASE_RAC_ALERTS_API_PATH = '/internal/rac/alerts';
-export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting';
-export const BASE_ACTION_API_PATH = '/api/actions';
-export const INTERNAL_BASE_ACTION_API_PATH = '/internal/actions';
+export * from './connector_type_modal';
