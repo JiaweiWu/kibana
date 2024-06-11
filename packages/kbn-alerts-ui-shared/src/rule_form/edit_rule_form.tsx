@@ -50,7 +50,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     },
   });
 
-  const { isLoading, ruleType, ruleTypeModel, uiConfig, healthCheckError, fetchedFormData } =
+  const { isInitialLoading, ruleType, ruleTypeModel, uiConfig, healthCheckError, fetchedFormData } =
     useLoadDependencies({
       http,
       toasts: notification.toasts,
@@ -68,7 +68,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     [id, mutate]
   );
 
-  if (isLoading) {
+  if (isInitialLoading) {
     return <EuiLoadingSpinner />;
   }
 

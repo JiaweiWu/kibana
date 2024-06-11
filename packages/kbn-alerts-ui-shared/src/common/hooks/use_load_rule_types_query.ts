@@ -23,6 +23,8 @@ export interface UseRuleTypesProps {
   filteredRuleTypes?: string[];
   registeredRuleTypes?: Array<{ id: string; description: string }>;
   enabled?: boolean;
+  staleTime?: number
+  cacheTime?: number
 }
 
 const getFilteredIndex = ({
@@ -64,6 +66,8 @@ export const useLoadRuleTypesQuery = ({
   filteredRuleTypes,
   registeredRuleTypes,
   enabled = true,
+  staleTime,
+  cacheTime,
 }: UseRuleTypesProps) => {
   const queryFn = () => {
     return fetchRuleTypes({ http });
@@ -85,7 +89,8 @@ export const useLoadRuleTypesQuery = ({
     refetchOnWindowFocus: false,
     // Leveraging TanStack Query's caching system to avoid duplicated requests as
     // other state-sharing solutions turned out to be overly complex and less readable
-    staleTime: 60 * 1000,
+    staleTime: staleTime || 60 * 1000,
+    cacheTime,
     enabled,
   });
 
@@ -109,6 +114,7 @@ export const useLoadRuleTypesQuery = ({
   return {
     ruleTypesState: {
       initialLoad: isLoading || isInitialLoading,
+      isInitialLoading,
       isLoading: isLoading || isFetching,
       data: filteredIndex,
       error,

@@ -15,6 +15,8 @@ import { useLoadUiHealth } from './use_load_ui_health';
 
 export interface UseHealthCheckProps {
   http: HttpStart;
+  staleTime?: number
+  cacheTime?: number
 }
 
 export interface UseHealthCheckResult {
@@ -23,16 +25,28 @@ export interface UseHealthCheckResult {
 }
 
 export const useHealthCheck = (props: UseHealthCheckProps) => {
-  const { http } = props;
+  const { http, staleTime, cacheTime } = props;
 
-  const { data: uiHealth, isLoading: isLoadingUiHealth } = useLoadUiHealth({ http });
+  const { 
+    data: uiHealth, 
+    isLoading: isLoadingUiHealth,
+    isInitialLoading: isInitialLoadingUiHealth,
+  } = useLoadUiHealth({ http, staleTime, cacheTime });
 
-  const { data: alertingFrameworkHealth, isLoading: isLoadingAlertingFrameworkHealth } =
-    useLoadAlertingFrameworkHealth({ http });
+  const { 
+    data: alertingFrameworkHealth, 
+    isLoading: isLoadingAlertingFrameworkHealth,
+    isInitialLoading: isInitialLoadingAlertingFrameworkHealth,
+  } =
+    useLoadAlertingFrameworkHealth({ http, staleTime, cacheTime });
 
   const isLoading = useMemo(() => {
     return isLoadingUiHealth || isLoadingAlertingFrameworkHealth;
   }, [isLoadingUiHealth, isLoadingAlertingFrameworkHealth]);
+
+  const isInitialLoading = useMemo(() => {
+    return isInitialLoadingUiHealth || isInitialLoadingAlertingFrameworkHealth;
+  }, [isInitialLoadingUiHealth, isInitialLoadingAlertingFrameworkHealth]);
 
   const alertingHealth: HealthStatus | null = useMemo(() => {
     if (isLoading || !uiHealth) {
@@ -86,6 +100,7 @@ export const useHealthCheck = (props: UseHealthCheckProps) => {
 
   return {
     isLoading,
+    isInitialLoading,
     error,
   };
 };

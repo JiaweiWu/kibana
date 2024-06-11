@@ -12,24 +12,29 @@ import { fetchUiHealthStatus } from '../apis';
 
 export interface UseLoadUiHealthProps {
   http: HttpStart;
+  staleTime?: number
+  cacheTime?: number
 }
 
 export const useLoadUiHealth = (props: UseLoadUiHealthProps) => {
-  const { http } = props;
+  const { http, staleTime, cacheTime } = props;
 
   const queryFn = () => {
     return fetchUiHealthStatus({ http });
   };
 
-  const { data, isSuccess, isFetching, isLoading, isError, error } = useQuery({
+  const { data, isSuccess, isFetching, isLoading, isInitialLoading, isError, error } = useQuery({
     queryKey: ['useLoadUiHealth'],
     queryFn,
     refetchOnWindowFocus: false,
+    staleTime,
+    cacheTime,
   });
 
   return {
     data,
     isLoading: isLoading || isFetching,
+    isInitialLoading,
     isSuccess,
     isError,
     error,

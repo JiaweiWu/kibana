@@ -42,18 +42,49 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     filteredRuleTypes = [],
   } = props;
 
-  const { data: uiConfig, isLoading: isLoadingUiConfig } = useLoadUiConfig({ http });
+  const { 
+    data: uiConfig, 
+    isLoading: isLoadingUiConfig,
+    isInitialLoading: isInitialLoadingUiConfig,
+  } = useLoadUiConfig({ 
+    http, 
+    staleTime: Infinity, 
+    cacheTime: Infinity,
+  });
 
-  const { error: healthCheckError, isLoading: isLoadingHealthCheck } = useHealthCheck({ http });
+  const { 
+    error: healthCheckError, 
+    isLoading: isLoadingHealthCheck,
+    isInitialLoading: isInitialLoadingHealthCheck,
+  } = useHealthCheck({ 
+    http,
+    staleTime: Infinity, 
+    cacheTime: Infinity,
+  });
 
-  const { data: fetchedFormData, isLoading: isLoadingRule } = useResolveRule({ http, id });
+  const { 
+    data: fetchedFormData, 
+    isLoading: isLoadingRule,
+    isInitialLoading: isInitialLoadingRule,
+  } = useResolveRule({ 
+    id,
+    http, 
+    staleTime: Infinity, 
+    cacheTime: Infinity,
+  });
 
   const {
-    ruleTypesState: { data: ruleTypeIndex, isLoading: isLoadingRuleTypes },
+    ruleTypesState: { 
+      data: ruleTypeIndex, 
+      isLoading: isLoadingRuleTypes,
+      isInitialLoading: isInitialLoadingRuleTypes,
+    },
   } = useLoadRuleTypesQuery({
     http,
     toasts,
     filteredRuleTypes,
+    staleTime: Infinity, 
+    cacheTime: Infinity,
   });
 
   const computedRuleTypeId = useMemo(() => {
@@ -88,8 +119,16 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     return isLoadingUiConfig || isLoadingHealthCheck || isLoadingRule || isLoadingRuleTypes;
   }, [id, isLoadingUiConfig, isLoadingHealthCheck, isLoadingRule, isLoadingRuleTypes]);
 
+  const isInitialLoading = useMemo(() => {
+    if (id === undefined) {
+      return isInitialLoadingUiConfig || isInitialLoadingHealthCheck || isInitialLoadingRuleTypes;
+    }
+    return isInitialLoadingUiConfig || isInitialLoadingHealthCheck || isInitialLoadingRule || isInitialLoadingRuleTypes;
+  }, [id, isInitialLoadingUiConfig, isInitialLoadingHealthCheck, isInitialLoadingRule, isInitialLoadingRuleTypes]);
+
   return {
     isLoading,
+    isInitialLoading,
     ruleType,
     ruleTypeModel,
     uiConfig,

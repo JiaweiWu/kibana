@@ -73,7 +73,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     },
   });
 
-  const { isLoading, ruleType, ruleTypeModel, uiConfig, healthCheckError } = useLoadDependencies({
+  const { isInitialLoading, ruleType, ruleTypeModel, uiConfig, healthCheckError } = useLoadDependencies({
     http,
     toasts: notification.toasts,
     ruleTypeRegistry,
@@ -90,7 +90,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     [mutate]
   );
 
-  if (isLoading) {
+  if (isInitialLoading) {
     return <EuiLoadingSpinner />;
   }
 

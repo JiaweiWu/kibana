@@ -14,10 +14,12 @@ import { RuleFormData } from '../../rule_form';
 export interface UseResolveProps {
   http: HttpStart;
   id?: string;
+  staleTime?: number
+  cacheTime?: number
 }
 
 export const useResolveRule = (props: UseResolveProps) => {
-  const { id, http } = props;
+  const { id, http, staleTime, cacheTime } = props;
 
   const queryFn = () => {
     if (id) {
@@ -25,7 +27,7 @@ export const useResolveRule = (props: UseResolveProps) => {
     }
   };
 
-  const { data, isSuccess, isFetching, isLoading, isError, error } = useQuery({
+  const { data, isSuccess, isFetching, isLoading, isInitialLoading, isError, error } = useQuery({
     queryKey: ['useResolveRule', id],
     queryFn,
     enabled: typeof id !== 'undefined',
@@ -40,11 +42,14 @@ export const useResolveRule = (props: UseResolveProps) => {
       };
     },
     refetchOnWindowFocus: false,
+    staleTime, 
+    cacheTime,
   });
 
   return {
     data,
     isLoading: isLoading || isFetching,
+    isInitialLoading,
     isSuccess,
     isError,
     error,

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import {
   RULE_PAGE_FOOTER_CANCEL_TEXT,
@@ -15,9 +15,10 @@ import {
   RULE_PAGE_FOOTER_SAVE_TEXT,
 } from '../translations';
 import { useRuleFormState } from '../hooks';
-import { isValidRule } from '../validation';
+import { isValidRule, validateActions } from '../validation';
 import { RulePageShowRequestModal } from './rule_page_show_request_modal';
 import { RulePageConfirmCreateRule } from './rule_page_confirm_create_rule';
+import { RuleFormErrors } from '../types';
 
 export interface RulePageFooterProps {
   isEdit?: boolean;
@@ -30,13 +31,31 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
   const [showRequestModal, setShowRequestModal] = useState<boolean>(false);
   const [showCreateConfirmation, setShowCreateConfirmation] = useState<boolean>(false);
 
+  const [isValidatingActions, setIsValidatingActions] = useState<boolean>(true);
+  const [ruleActionsErrors, setRuleActionErrors]= useState<RuleFormErrors[]>([]);
+
   const { isEdit = false, isSaving = false, onCancel, onSave } = props;
 
-  const { formData, errors } = useRuleFormState();
+  const { formData, errors, plugins: { actionTypeRegistry } } = useRuleFormState();
+
+  useEffect(() => {
+    setIsValidatingActions(true);
+    validateActions({
+      actions: formData.actions, 
+      actionTypeRegistry
+    }).then((errors) => {
+      setRuleActionErrors(errors);
+    }).finally(() => {
+      setIsValidatingActions(false);
+    });
+  }, [formData.actions]);
 
   const hasErrors = useMemo(() => {
-    return !!(errors && !isValidRule(formData, errors));
-  }, [formData, errors]);
+    if (isValidatingActions) {
+      return true;
+    }
+    return !!(errors && !isValidRule(formData, errors, ruleActionsErrors));
+  }, [formData, errors, ruleActionsErrors, isValidatingActions]);
 
   const saveButtonText = useMemo(() => {
     if (isEdit) {

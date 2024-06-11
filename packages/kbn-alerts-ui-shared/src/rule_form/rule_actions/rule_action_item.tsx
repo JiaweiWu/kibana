@@ -27,6 +27,8 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiCallOut,
+  EuiToolTip,
+  EuiBadge,
 } from '@elastic/eui';
 import {
   ActionGroup,
@@ -39,7 +41,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertConsumers, RuleCreationValidConsumer, ValidFeatureId } from '@kbn/rule-data-utils';
 import { isEmpty, partition, pick, some } from 'lodash';
 import { ActionVariables } from '@kbn/triggers-actions-ui-types';
-import { RuleUiAction } from '../types';
+import { RuleFormErrors, RuleUiAction } from '../types';
 import { useRuleFormDispatch, useRuleFormState } from '../hooks';
 import { ActionConnector, ActionType, RuleTypeWithDescription } from '../../common/types';
 import { RuleActionNotifyWhen } from './rule_action_notify_when';
@@ -593,6 +595,23 @@ function getAvailableActionVariables(
   }, []);
 }
 
+const filterQueryRequiredError = i18n.translate(
+  'xpack.triggersActionsUI.sections.actionTypeForm.error.requiredFilterQuery',
+  {
+    defaultMessage: 'A custom query is required.',
+  }
+);
+
+export const validateActionFilterQuery = (actionItem: RuleUiAction): string | null => {
+  if ('alertsFilter' in actionItem) {
+    const query = actionItem?.alertsFilter?.query;
+    if (query && !query.kql) {
+      return filterQueryRequiredError;
+    }
+  }
+  return null;
+};
+
 export const RuleActionItem = (props: RuleActionItemProps) => {
   const {
     action,
@@ -618,6 +637,18 @@ export const RuleActionItem = (props: RuleActionItemProps) => {
   >({});
 
   const [warning, setWarning] = useState<string | null>(null);
+
+  const [queryError, setQueryError] = useState<string | null>(null);
+
+  const [actionParamsErrors, setActionParamsErrors] = useState<{ errors: RuleFormErrors }>({
+    errors: {},
+  });
+
+  const [isOpen, setIsOpen] = useState(true);
+
+  const showActionGroupErrorIcon = (): boolean => {
+    return !isOpen && some(actionParamsErrors.errors, (error) => !isEmpty(error));
+  };
 
   const {
     plugins: { actionTypeRegistry, http },
@@ -843,6 +874,19 @@ export const RuleActionItem = (props: RuleActionItemProps) => {
     }
   }, [actionItem.params, storedActionParamsForAadToggle]);
 
+  useEffect(() => {
+    setQueryError(validateActionFilterQuery(actionItem));
+  }, [actionItem]);
+
+  useEffect(() => {
+    (async () => {
+      const res: { errors: RuleFormErrors } = await actionTypeRegistry
+        .get(actionItem.actionTypeId)
+        ?.validateParams(actionItem.params);
+      setActionParamsErrors(res);
+    })();
+  }, [actionItem]);
+
   const settingsContent = (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
@@ -862,6 +906,9 @@ export const RuleActionItem = (props: RuleActionItemProps) => {
                     value: frequency,
                   },
                 });
+              }}
+              onUseDefaultMessage={() => {
+                setUseDefaultMessage(true);
               }}
               showMinimumThrottleWarning={showMinimumThrottleWarning}
               showMinimumThrottleUnitWarning={showMinimumThrottleUnitWarning}
@@ -908,7 +955,7 @@ export const RuleActionItem = (props: RuleActionItemProps) => {
         <EuiFlexItem>
           <EuiFlexGroup direction="column">
             <EuiFlexItem>
-              <EuiFormRow fullWidth>
+              <EuiFormRow error={queryError} isInvalid={!!queryError} fullWidth>
                 <RuleActionAlertsFilter
                   state={actionItem.alertsFilter?.query}
                   onChange={(query) => {
@@ -958,13 +1005,15 @@ export const RuleActionItem = (props: RuleActionItemProps) => {
 
   const ParamsFieldsComponent = actionTypeModel.actionParamsFields;
 
+  console.info('errors', actionParamsErrors.errors);
+
   const messagesContent = (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
         <Suspense fallback={null}>
           <ParamsFieldsComponent
             actionParams={actionItem.params as any}
-            errors={{}}
+            errors={actionParamsErrors.errors}
             index={index}
             selectedActionGroupId={selectedActionGroup?.id}
             editAction={(key: string, value: RuleActionParam, i: number) => {
@@ -1021,6 +1070,7 @@ export const RuleActionItem = (props: RuleActionItemProps) => {
         borderRadius: euiTheme.border.radius.medium,
       }}
       id={action.id}
+      onToggle={setIsOpen}
       buttonProps={{
         style: {
           width: '100%',
@@ -1046,7 +1096,27 @@ export const RuleActionItem = (props: RuleActionItemProps) => {
         <EuiPanel color="subdued" paddingSize="m">
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiIcon size="l" type={actionTypeModel.iconClass} />
+              {showActionGroupErrorIcon() ? 
+                (
+                  <EuiToolTip
+                    content={i18n.translate(
+                      'xpack.triggersActionsUI.sections.actionTypeForm.actionErrorToolTip',
+                      { defaultMessage: 'Action contains errors.' }
+                    )}
+                  >
+                    <EuiIcon
+                      data-test-subj="action-group-error-icon"
+                      type="warning"
+                      color="danger"
+                      size="l"
+                    />
+                  </EuiToolTip>
+                ): (
+                  <Suspense fallback={null}>
+                    <EuiIcon size="l" type={actionTypeModel.iconClass} />
+                  </Suspense>
+                )
+              }
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText>{connector.name}</EuiText>
@@ -1056,6 +1126,44 @@ export const RuleActionItem = (props: RuleActionItemProps) => {
                 <strong>{actionType?.name}</strong>
               </EuiText>
             </EuiFlexItem>
+            {(selectedActionGroup || actionItem.frequency?.summary) && !isOpen && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge iconType="clock">
+                  {actionItem.frequency?.summary
+                    ? i18n.translate(
+                        'xpack.triggersActionsUI.sections.actionTypeForm.summaryGroupTitle',
+                        {
+                          defaultMessage: 'Summary of alerts',
+                        }
+                      )
+                    : i18n.translate(
+                        'xpack.triggersActionsUI.sections.actionTypeForm.runWhenGroupTitle',
+                        {
+                          defaultMessage: 'Run when {groupName}',
+                          values: {
+                            groupName: selectedActionGroup!.name.toLocaleLowerCase(),
+                          },
+                        }
+                      )}
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
+            {warning && !isOpen && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge
+                  data-test-subj="warning-badge"
+                  iconType="warning"
+                  color="warning"
+                >
+                  {i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionTypeForm.actionWarningsTitle',
+                    {
+                      defaultMessage: '1 warning',
+                    }
+                  )}
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiPanel>
       }

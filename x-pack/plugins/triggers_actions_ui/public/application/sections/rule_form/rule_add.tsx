@@ -179,6 +179,7 @@ const RuleAdd = <
   useEffect(() => {
     (async () => {
       setIsLoading(true);
+      console.info('i get called');
       const res = await getRuleActionErrors(rule.actions, actionTypeRegistry);
       setIsLoading(false);
       setRuleActionsErrors([...res]);

@@ -7,7 +7,7 @@
  */
 
 import { RuleAction } from '@kbn/alerting-types';
-import { RuleFormData, RuleFormState } from '../types';
+import { RuleFormData, RuleFormErrors, RuleFormState } from '../types';
 import { validateRuleBase, validateRuleParams } from '../validation';
 
 export type RuleFormStateReducerAction =
@@ -80,6 +80,13 @@ export type RuleFormStateReducerAction =
         key: string;
         value: unknown;
       };
+    }
+  | {
+      type: 'setActionError',
+      payload: {
+        uuid: string;
+        errors: RuleFormErrors;
+      }
     };
 
 const getUpdateWithValidation =
@@ -237,6 +244,14 @@ export const ruleFormStateReducer = (
           return existingAction;
         }),
       }));
+    }
+    case 'setActionError': {
+      const { payload: { uuid, errors } } = action;
+      const actionErrors = (ruleFormState.actionErrors || {})[uuid] = errors;
+      return {
+        ...ruleFormState,
+        actionErrors: actionErrors as RuleFormState['actionErrors'],
+      };
     }
     default: {
       return ruleFormState;

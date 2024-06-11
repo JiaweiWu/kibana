@@ -7,6 +7,7 @@
  */
 
 import { isObject } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { RuleTypeModel, RuleFormErrors, MinimumScheduleInterval, RuleFormData } from '../types';
 import { parseDuration, formatDuration } from '../utils';
 import {
@@ -17,6 +18,8 @@ import {
   INTERVAL_MINIMUM_TEXT,
   RULE_ALERT_DELAY_BELOW_MINIMUM_TEXT,
 } from '../translations';
+import { RuleAction } from '@kbn/alerting-types';
+import { ActionTypeRegistryContract } from '../../common/types';
 
 export function validateRuleBase({
   formData,
@@ -54,6 +57,19 @@ export function validateRuleBase({
     }
   }
 
+  const emptyConnectorActions = formData.actions.find(
+    (actionItem) => /^\d+$/.test(actionItem.id) && Object.keys(actionItem.params).length > 0
+  );
+
+  if (emptyConnectorActions) {
+    errors.actionConnectors.push(
+      i18n.translate('xpack.triggersActionsUI.sections.ruleForm.error.requiredActionConnector', {
+        defaultMessage: 'Action for {actionTypeId} connector is required.',
+        values: { actionTypeId: emptyConnectorActions.actionTypeId },
+      })
+    );
+  }
+
   if (!formData.ruleTypeId) {
     errors.ruleTypeId.push(RULE_TYPE_REQUIRED_TEXT);
   }
@@ -77,6 +93,23 @@ export const validateRuleParams = ({
   return ruleTypeModel.validate(formData.params, isServerless).errors;
 };
 
+export async function validateActions({
+  actions,
+  actionTypeRegistry,
+}: {
+  actions: RuleAction[],
+  actionTypeRegistry: ActionTypeRegistryContract,
+}): Promise<RuleFormErrors[]> {
+  return await Promise.all(
+    actions.map(
+      async (ruleAction) =>
+        (
+          await actionTypeRegistry.get(ruleAction.actionTypeId)?.validateParams(ruleAction.params)
+        ).errors
+    )
+  );
+}
+
 export const hasObjectErrors: (errors: RuleFormErrors) => boolean = (errors) =>
   !!Object.values(errors).find((errorList) => {
     if (isObject(errorList)) return hasObjectErrors(errorList as RuleFormErrors);
@@ -85,7 +118,11 @@ export const hasObjectErrors: (errors: RuleFormErrors) => boolean = (errors) =>
 
 export function isValidRule(
   formData: RuleFormData,
-  errors: RuleFormErrors
+  errors: RuleFormErrors,
+  actionsErrors: RuleFormErrors[],
 ): formData is RuleFormData {
-  return !hasObjectErrors(errors);
+  return (
+    !hasObjectErrors(errors) &&
+    actionsErrors.every((error) => !hasObjectErrors(error))
+  );
 }

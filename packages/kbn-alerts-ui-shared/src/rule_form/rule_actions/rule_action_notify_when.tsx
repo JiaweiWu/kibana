@@ -145,6 +145,7 @@ interface RuleActionNotifyWhenProps {
   showMinimumThrottleUnitWarning?: boolean;
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
   onChange: (frequency: RuleAction['frequency']) => void;
+  onUseDefaultMessage: () => void;
 }
 
 export const RuleActionNotifyWhen = ({
@@ -156,6 +157,7 @@ export const RuleActionNotifyWhen = ({
   showMinimumThrottleUnitWarning,
   notifyWhenSelectOptions = NOTIFY_WHEN_OPTIONS,
   onChange,
+  onUseDefaultMessage,
 }: RuleActionNotifyWhenProps) => {
   const [summaryMenuOpen, setSummaryMenuOpen] = useState(false);
 
@@ -220,9 +222,10 @@ export const RuleActionNotifyWhen = ({
           : frequency.notifyWhen,
         throttle: frequency.throttle,
       });
+      onUseDefaultMessage();
       setSummaryMenuOpen(false);
     },
-    [frequency, selectedOptionDoesNotExist, getDefaultNotifyWhenOption, onChange]
+    [frequency, onUseDefaultMessage, selectedOptionDoesNotExist, getDefaultNotifyWhenOption, onChange]
   );
 
   const summaryOptions = useMemo(

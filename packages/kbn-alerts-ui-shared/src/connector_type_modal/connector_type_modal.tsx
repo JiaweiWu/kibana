@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, Suspense } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,6 +26,7 @@ import {
   EuiSpacer,
   useCurrentEuiBreakpoint,
   EuiButton,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { useRuleFormState } from '../rule_form/hooks';
 import {
@@ -188,7 +189,9 @@ export const ConnectorTypeModal = (props: ConnectorTypeModalProps) => {
                 layout="horizontal"
                 icon={
                   <div style={{ marginInlineEnd: `16px` }}>
+                  <Suspense fallback={<EuiLoadingSpinner />}>
                     <EuiIcon size="l" type={actionTypeModel.iconClass} />
+                  </Suspense>
                   </div>
                 }
                 title={name}

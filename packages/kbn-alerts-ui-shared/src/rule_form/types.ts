@@ -144,6 +144,7 @@ export interface RuleFormState<Params extends RuleTypeParams = RuleTypeParams> {
   formData: RuleFormData<Params>;
   plugins: RuleFormPlugins;
   errors?: RuleFormErrors;
+  actionErrors?: Record<string, RuleFormErrors>;
   selectedRuleType: RuleTypeWithDescription;
   selectedRuleTypeModel: RuleTypeModel<Params>;
   multiConsumerSelection?: RuleCreationValidConsumer | null;
