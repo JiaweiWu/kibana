@@ -8,14 +8,14 @@
 
 import { useQuery } from '@tanstack/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
-import { resolveRule } from '../apis';
+import { resolveRule } from '../apis/resolve_rule';
 import { RuleFormData } from '../../rule_form';
 
 export interface UseResolveProps {
   http: HttpStart;
   id?: string;
-  staleTime?: number
-  cacheTime?: number
+  staleTime?: number;
+  cacheTime?: number;
 }
 
 export const useResolveRule = (props: UseResolveProps) => {
@@ -30,7 +30,7 @@ export const useResolveRule = (props: UseResolveProps) => {
   const { data, isSuccess, isFetching, isLoading, isInitialLoading, isError, error } = useQuery({
     queryKey: ['useResolveRule', id],
     queryFn,
-    enabled: typeof id !== 'undefined',
+    enabled: !!id,
     select: (rule): RuleFormData | null => {
       if (!rule) {
         return null;
@@ -42,7 +42,7 @@ export const useResolveRule = (props: UseResolveProps) => {
       };
     },
     refetchOnWindowFocus: false,
-    staleTime, 
+    staleTime,
     cacheTime,
   });
 

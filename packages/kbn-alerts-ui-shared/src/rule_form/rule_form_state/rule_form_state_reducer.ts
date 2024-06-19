@@ -7,8 +7,9 @@
  */
 
 import { RuleAction } from '@kbn/alerting-types';
-import { RuleFormData, RuleFormErrors, RuleFormState } from '../types';
+import { RuleFormData, RuleFormState } from '../types';
 import { validateRuleBase, validateRuleParams } from '../validation';
+import { RuleFormParamsErrors } from '../../common';
 
 export type RuleFormStateReducerAction =
   | {
@@ -82,11 +83,11 @@ export type RuleFormStateReducerAction =
       };
     }
   | {
-      type: 'setActionError',
+      type: 'setActionError';
       payload: {
         uuid: string;
-        errors: RuleFormErrors;
-      }
+        errors: RuleFormParamsErrors;
+      };
     };
 
 const getUpdateWithValidation =
@@ -105,16 +106,14 @@ const getUpdateWithValidation =
     return {
       ...ruleFormState,
       formData,
-      errors: {
-        ...validateRuleBase({
-          formData: formDataWithMultiConsumer,
-          minimumScheduleInterval,
-        }),
-        ...validateRuleParams({
-          formData: formDataWithMultiConsumer,
-          ruleTypeModel: selectedRuleTypeModel,
-        }),
-      },
+      baseErrors: validateRuleBase({
+        formData: formDataWithMultiConsumer,
+        minimumScheduleInterval,
+      }),
+      paramsErrors: validateRuleParams({
+        formData: formDataWithMultiConsumer,
+        ruleTypeModel: selectedRuleTypeModel,
+      }),
     };
   };
 
@@ -246,8 +245,10 @@ export const ruleFormStateReducer = (
       }));
     }
     case 'setActionError': {
-      const { payload: { uuid, errors } } = action;
-      const actionErrors = (ruleFormState.actionErrors || {})[uuid] = errors;
+      const {
+        payload: { uuid, errors },
+      } = action;
+      const actionErrors = ((ruleFormState.actionErrors || {})[uuid] = errors);
       return {
         ...ruleFormState,
         actionErrors: actionErrors as RuleFormState['actionErrors'],

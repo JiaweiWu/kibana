@@ -8,12 +8,12 @@
 
 import { useQuery } from '@tanstack/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
-import { fetchUiHealthStatus } from '../apis';
+import { fetchUiHealthStatus } from '../apis/fetch_ui_health_status';
 
 export interface UseLoadUiHealthProps {
   http: HttpStart;
-  staleTime?: number
-  cacheTime?: number
+  staleTime?: number;
+  cacheTime?: number;
 }
 
 export const useLoadUiHealth = (props: UseLoadUiHealthProps) => {
@@ -23,7 +23,7 @@ export const useLoadUiHealth = (props: UseLoadUiHealthProps) => {
     return fetchUiHealthStatus({ http });
   };
 
-  const { data, isSuccess, isFetching, isLoading, isInitialLoading, isError, error } = useQuery({
+  const { data, isSuccess, isLoading, isFetching, isInitialLoading, isError, error } = useQuery({
     queryKey: ['useLoadUiHealth'],
     queryFn,
     refetchOnWindowFocus: false,

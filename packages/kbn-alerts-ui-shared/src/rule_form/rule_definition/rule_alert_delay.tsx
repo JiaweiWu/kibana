@@ -7,19 +7,19 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFieldText, EuiFormRow, EuiIconTip } from '@elastic/eui';
+import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import {
   ALERT_DELAY_TITLE_PREFIX,
   ALERT_DELAY_TITLE_SUFFIX,
-  ALERT_DELAY_HELP_TEXT,
   ALERT_DELAY_TITLE,
 } from '../translations';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 
 const INTEGER_REGEX = /^[1-9][0-9]*$/;
+const INVALID_KEYS = ['-', '+', '.', 'e', 'E'];
 
 export const RuleAlertDelay = () => {
-  const { formData, errors = {} } = useRuleFormState();
+  const { formData, baseErrors } = useRuleFormState();
 
   const dispatch = useRuleFormDispatch();
 
@@ -47,30 +47,32 @@ export const RuleAlertDelay = () => {
     [dispatch]
   );
 
+  const onKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (INVALID_KEYS.includes(e.key)) {
+      e.preventDefault();
+    }
+  }, []);
+
   return (
     <EuiFormRow
       fullWidth
       label={ALERT_DELAY_TITLE}
-      isInvalid={errors.alertDelay?.length > 0}
-      error={errors.alertDelay}
+      isInvalid={!!baseErrors?.alertDelay?.length}
+      error={baseErrors?.alertDelay}
       data-test-subj="alertDelay"
       display="rowCompressed"
     >
-      <EuiFieldText
+      <EuiFieldNumber
         fullWidth
-        inputMode="numeric"
-        pattern="[1-9][0-9]*"
+        min={1}
         value={alertDelay?.active ?? ''}
         name="alertDelay"
         data-test-subj="alertDelayInput"
-        placeholder={ALERT_DELAY_TITLE}
-        prepend={[
-          ALERT_DELAY_TITLE_PREFIX,
-          <EuiIconTip position="right" type="questionInCircle" content={ALERT_DELAY_HELP_TEXT} />,
-        ]}
-        isInvalid={errors.alertDelay?.length > 0}
+        prepend={[ALERT_DELAY_TITLE_PREFIX]}
+        isInvalid={!!baseErrors?.alertDelay?.length}
         append={ALERT_DELAY_TITLE_SUFFIX}
         onChange={onAlertDelayChange}
+        onKeyDown={onKeyDown}
       />
     </EuiFormRow>
   );

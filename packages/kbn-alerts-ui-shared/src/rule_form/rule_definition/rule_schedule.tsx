@@ -7,7 +7,7 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { EuiFlexItem, EuiFormRow, EuiFlexGroup, EuiSelect, EuiFieldText } from '@elastic/eui';
+import { EuiFlexItem, EuiFormRow, EuiFlexGroup, EuiSelect, EuiFieldNumber } from '@elastic/eui';
 import {
   parseDuration,
   formatDuration,
@@ -15,15 +15,16 @@ import {
   getDurationNumberInItsUnit,
 } from '../utils/parse_duration';
 import { getTimeOptions } from '../utils/get_time_options';
-import { MinimumScheduleInterval } from '../types';
 import {
   SCHEDULE_TITLE_PREFIX,
   INTERVAL_MINIMUM_TEXT,
   INTERVAL_WARNING_TEXT,
 } from '../translations';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
+import { MinimumScheduleInterval } from '../../common';
 
 const INTEGER_REGEX = /^[1-9][0-9]*$/;
+const INVALID_KEYS = ['-', '+', '.', 'e', 'E'];
 
 const getHelpTextForInterval = (
   currentInterval: string,
@@ -47,10 +48,8 @@ const getHelpTextForInterval = (
   }
 };
 
-const labelForRuleChecked = [SCHEDULE_TITLE_PREFIX];
-
 export const RuleSchedule = () => {
-  const { formData, errors = {}, minimumScheduleInterval } = useRuleFormState();
+  const { formData, baseErrors, minimumScheduleInterval } = useRuleFormState();
 
   const dispatch = useRuleFormDispatch();
 
@@ -59,8 +58,8 @@ export const RuleSchedule = () => {
   } = formData;
 
   const hasIntervalError = useMemo(() => {
-    return errors.interval?.length > 0;
-  }, [errors]);
+    return !!baseErrors?.interval?.length;
+  }, [baseErrors]);
 
   const intervalNumber = useMemo(() => {
     return getDurationNumberInItsUnit(interval ?? 1);
@@ -83,7 +82,7 @@ export const RuleSchedule = () => {
       if (!e.target.validity.valid) {
         return;
       }
-      const value = e.target.value;
+      const value = e.target.value.trim();
       if (INTEGER_REGEX.test(value)) {
         const parsedValue = parseInt(value, 10);
         dispatch({
@@ -109,27 +108,32 @@ export const RuleSchedule = () => {
     [intervalNumber, dispatch]
   );
 
+  const onKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (INVALID_KEYS.includes(e.key)) {
+      e.preventDefault();
+    }
+  }, []);
+
   return (
     <EuiFormRow
       fullWidth
       data-test-subj="ruleSchedule"
       display="rowCompressed"
       helpText={helpText}
-      isInvalid={errors.interval?.length > 0}
-      error={errors.interval}
+      isInvalid={hasIntervalError}
+      error={baseErrors?.interval}
     >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={2}>
-          <EuiFieldText
+          <EuiFieldNumber
             fullWidth
-            inputMode="numeric"
-            pattern="[1-9][0-9]*"
-            prepend={labelForRuleChecked}
-            isInvalid={errors.interval?.length > 0}
+            prepend={[SCHEDULE_TITLE_PREFIX]}
+            isInvalid={hasIntervalError}
             value={intervalNumber}
             name="interval"
             data-test-subj="ruleScheduleNumberInput"
             onChange={onIntervalNumberChange}
+            onKeyDown={onKeyDown}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={3}>

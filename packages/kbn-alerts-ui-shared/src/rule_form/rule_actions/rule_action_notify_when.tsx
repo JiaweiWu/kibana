@@ -225,7 +225,13 @@ export const RuleActionNotifyWhen = ({
       onUseDefaultMessage();
       setSummaryMenuOpen(false);
     },
-    [frequency, onUseDefaultMessage, selectedOptionDoesNotExist, getDefaultNotifyWhenOption, onChange]
+    [
+      frequency,
+      onUseDefaultMessage,
+      selectedOptionDoesNotExist,
+      getDefaultNotifyWhenOption,
+      onChange,
+    ]
   );
 
   const summaryOptions = useMemo(

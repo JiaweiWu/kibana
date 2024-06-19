@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 
 export {
@@ -15,16 +14,8 @@ export {
   SecurityConnectorFeatureId,
   GenerativeAIForSecurityConnectorFeatureId,
 } from './connector_feature_config';
-export interface ActionType {
-  id: string;
-  name: string;
-  enabled: boolean;
-  enabledInConfig: boolean;
-  enabledInLicense: boolean;
-  minimumLicenseRequired: LicenseType;
-  supportedFeatureIds: string[];
-  isSystemActionType: boolean;
-}
+
+export type { ActionType } from '@kbn/actions-types';
 
 export enum InvalidEmailReason {
   invalid = 'invalid',

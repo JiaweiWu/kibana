@@ -7,8 +7,7 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
-import { AsApiContract, RewriteRequestCase } from '@kbn/actions-types';
-import { ActionType } from '../types';
+import { AsApiContract, RewriteRequestCase, ActionType } from '@kbn/actions-types';
 import { BASE_ACTION_API_PATH, INTERNAL_BASE_ACTION_API_PATH } from '../constants';
 
 const rewriteResponseRes = (results: Array<AsApiContract<ActionType>>): ActionType[] => {

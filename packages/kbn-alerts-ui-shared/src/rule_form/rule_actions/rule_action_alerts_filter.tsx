@@ -11,8 +11,8 @@ import { ValidFeatureId } from '@kbn/rule-data-utils';
 import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { EuiSwitch, EuiSpacer } from '@elastic/eui';
-import { AlertsFilter } from '@kbn/alerting-plugin/common';
 import deepEqual from 'fast-deep-equal';
+import { AlertsFilter } from '@kbn/alerting-types';
 import AlertsSearchBar from '../../alerts_search_bar';
 import { useRuleFormState } from '../hooks';
 

@@ -22,7 +22,6 @@ import {
   EuiSpacer,
   EuiErrorBoundary,
 } from '@elastic/eui';
-import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import {
   DOC_LINK_TITLE,
   LOADING_RULE_TYPE_PARAMS_TITLE,
@@ -34,6 +33,7 @@ import {
   SCOPE_DESCRIPTION_TEXT,
   ADVANCED_OPTIONS_TITLE,
   ALERT_DELAY_DESCRIPTION_TEXT,
+  ALERT_DELAY_HELP_TEXT,
 } from '../translations';
 import { RuleAlertDelay } from './rule_alert_delay';
 import { RuleConsumerSelection } from './rule_consumer_selection';
@@ -42,24 +42,26 @@ import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 import { MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
 import { getAuthorizedConsumers } from '../utils';
 
-interface RuleDefinitionProps {
-  canShowConsumerSelection?: boolean;
-  validConsumers?: RuleCreationValidConsumer[];
-}
-
-export const RuleDefinition = (props: RuleDefinitionProps) => {
-  const { canShowConsumerSelection = false, validConsumers } = props;
-
-  const { formData, plugins, errors, metadata, id, selectedRuleType, selectedRuleTypeModel } =
-    useRuleFormState();
+export const RuleDefinition = () => {
+  const {
+    id,
+    formData,
+    plugins,
+    paramsErrors,
+    metadata,
+    selectedRuleType,
+    selectedRuleTypeModel,
+    validConsumers,
+    canShowConsumerSelection = false,
+  } = useRuleFormState();
 
   const dispatch = useRuleFormDispatch();
 
   const { charts, data, dataViews, unifiedSearch, docLinks } = plugins!;
 
-  const { params, schedule, alertDelay, notifyWhen, consumer } = formData;
+  const { params, schedule, notifyWhen, consumer } = formData;
 
-  const [isAdvancedOptionsVisible, setIsAdvancedOptionsVisible] = useState<boolean>(!!alertDelay);
+  const [isAdvancedOptionsVisible, setIsAdvancedOptionsVisible] = useState<boolean>(false);
 
   const authorizedConsumers = useMemo(() => {
     if (!validConsumers?.length) {
@@ -93,10 +95,6 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
     }
     return documentationUrl;
   }, [selectedRuleTypeModel, docLinks]);
-
-  const onToggleAdvancedOptions = useCallback((isOpen) => {
-    setIsAdvancedOptionsVisible(isOpen);
-  }, []);
 
   const onChangeMetaData = useCallback(
     (newMetadata) => {
@@ -135,7 +133,7 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
   );
 
   return (
-    <EuiSplitPanel.Outer hasBorder hasShadow={false}>
+    <EuiSplitPanel.Outer hasBorder hasShadow={false} data-test-subj="ruleDefinition">
       <EuiSplitPanel.Inner color="subdued">
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false} data-test-subj="ruleDefinitionHeaderRuleTypeName">
@@ -182,7 +180,7 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
                     ruleInterval={schedule.interval}
                     ruleThrottle={''}
                     alertNotifyWhen={notifyWhen || 'onActionGroupChange'}
-                    errors={errors || {}}
+                    errors={paramsErrors || {}}
                     setRuleParams={onSetRuleParams}
                     setRuleProperty={onSetRuleProperty}
                     defaultActionGroupId={selectedRuleType.defaultActionGroupId}
@@ -223,11 +221,7 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
           <EuiDescribedFormGroup
             fullWidth
             title={<h3>{SCOPE_TITLE}</h3>}
-            description={
-              <EuiText size="s">
-                <p>{SCOPE_DESCRIPTION_TEXT}</p>
-              </EuiText>
-            }
+            description={<p>{SCOPE_DESCRIPTION_TEXT}</p>}
           >
             <RuleConsumerSelection validConsumers={authorizedConsumers} />
           </EuiDescribedFormGroup>
@@ -236,8 +230,11 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
           <EuiAccordion
             id="advancedOptionsAccordion"
             data-test-subj="advancedOptionsAccordion"
-            onToggle={onToggleAdvancedOptions}
+            onToggle={setIsAdvancedOptionsVisible}
             initialIsOpen={isAdvancedOptionsVisible}
+            buttonProps={{
+              'data-test-subj': 'advancedOptionsAccordionButton',
+            }}
             buttonContent={
               <EuiText size="s">
                 <p>{ADVANCED_OPTIONS_TITLE}</p>
@@ -251,7 +248,14 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
                 title={<h4>{ALERT_DELAY_TITLE}</h4>}
                 description={
                   <EuiText size="s">
-                    <p>{ALERT_DELAY_DESCRIPTION_TEXT}</p>
+                    <p>
+                      {ALERT_DELAY_DESCRIPTION_TEXT}&nbsp;
+                      <EuiIconTip
+                        position="right"
+                        type="questionInCircle"
+                        content={ALERT_DELAY_HELP_TEXT}
+                      />
+                    </p>
                   </EuiText>
                 }
               >

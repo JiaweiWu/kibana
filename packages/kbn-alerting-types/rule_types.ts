@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectAttribute, SavedObjectAttributes } from '@kbn/core/server';
+import type {
+  SavedObjectAttribute,
+  SavedObjectAttributes,
+  SavedObjectsResolveResponse,
+} from '@kbn/core/server';
 import type { Filter } from '@kbn/es-query';
 import type { RuleNotifyWhenType, RRuleParams } from '.';
 
@@ -14,8 +18,8 @@ export type RuleTypeParams = Record<string, unknown>;
 export type RuleActionParams = SavedObjectAttributes;
 export type RuleActionParam = SavedObjectAttribute;
 
-export type IsoWeekday = 1 | 2 | 3 | 4 | 5 | 6 | 7;
-export const ISO_WEEKDAYS: IsoWeekday[] = [1, 2, 3, 4, 5, 6, 7];
+export const ISO_WEEKDAYS = [1, 2, 3, 4, 5, 6, 7] as const;
+export type IsoWeekday = typeof ISO_WEEKDAYS[number];
 
 export interface IntervalSchedule extends SavedObjectAttributes {
   interval: string;
@@ -240,3 +244,9 @@ export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
   Rule<Params>,
   'apiKey' | 'actions'
 > & { actions: SanitizedRuleAction[] };
+
+export type ResolvedSanitizedRule<Params extends RuleTypeParams = never> = SanitizedRule<Params> &
+  Omit<SavedObjectsResolveResponse, 'saved_object'> & {
+    outcome: string;
+    alias_target_id?: string;
+  };

@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  SavedObjectAttributes,
-  SavedObjectsResolveResponse,
-} from '@kbn/core/server';
+import type { SavedObjectAttributes } from '@kbn/core/server';
 
 import type {
   SanitizedRule,
@@ -17,7 +14,6 @@ import type {
   RuleAction,
   RuleSystemAction,
   RuleActionParam,
-  RuleTypeParams,
 } from '@kbn/alerting-types';
 
 export type {
@@ -47,6 +43,8 @@ export type {
   SanitizedAlertsFilter,
   SanitizedRuleAction,
   AlertsHealth,
+  AlertingFrameworkHealth,
+  ResolvedSanitizedRule,
 } from '@kbn/alerting-types';
 
 export {
@@ -75,12 +73,6 @@ export type RuleActionAlertsFilterProperty = AlertsFilterTimeframe | RuleActionP
 
 export type RuleActionKey = keyof RuleAction;
 export type RuleSystemActionKey = keyof RuleSystemAction;
-
-export type ResolvedSanitizedRule<Params extends RuleTypeParams = never> = SanitizedRule<Params> &
-  Omit<SavedObjectsResolveResponse, 'saved_object'> & {
-    outcome: string;
-    alias_target_id?: string;
-  };
 
 export type SanitizedRuleConfig = Pick<
   SanitizedRule,

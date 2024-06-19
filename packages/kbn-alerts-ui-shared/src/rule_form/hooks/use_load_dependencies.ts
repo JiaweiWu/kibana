@@ -16,8 +16,8 @@ import {
   useLoadUiConfig,
   useResolveRule,
 } from '../../common/hooks';
-import { RuleTypeRegistryContract } from '../types';
 import { getAvailableRuleTypes } from '../utils';
+import { RuleTypeRegistryContract } from '../../common';
 
 export interface UseLoadDependencies {
   http: HttpStart;
@@ -42,48 +42,35 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     filteredRuleTypes = [],
   } = props;
 
-  const { 
-    data: uiConfig, 
+  const {
+    data: uiConfig,
     isLoading: isLoadingUiConfig,
     isInitialLoading: isInitialLoadingUiConfig,
-  } = useLoadUiConfig({ 
-    http, 
-    staleTime: Infinity, 
-    cacheTime: Infinity,
-  });
-
-  const { 
-    error: healthCheckError, 
-    isLoading: isLoadingHealthCheck,
-    isInitialLoading: isInitialLoadingHealthCheck,
-  } = useHealthCheck({ 
-    http,
-    staleTime: Infinity, 
-    cacheTime: Infinity,
-  });
-
-  const { 
-    data: fetchedFormData, 
-    isLoading: isLoadingRule,
-    isInitialLoading: isInitialLoadingRule,
-  } = useResolveRule({ 
-    id,
-    http, 
-    staleTime: Infinity, 
-    cacheTime: Infinity,
-  });
+  } = useLoadUiConfig({ http });
 
   const {
-    ruleTypesState: { 
-      data: ruleTypeIndex, 
+    error: healthCheckError,
+    isLoading: isLoadingHealthCheck,
+    isInitialLoading: isInitialLoadingHealthCheck,
+  } = useHealthCheck({ http });
+
+  const {
+    data: fetchedFormData,
+    isLoading: isLoadingRule,
+    isInitialLoading: isInitialLoadingRule,
+  } = useResolveRule({ http, id });
+
+  const {
+    ruleTypesState: {
+      data: ruleTypeIndex,
       isLoading: isLoadingRuleTypes,
-      isInitialLoading: isInitialLoadingRuleTypes,
+      isInitialLoad: isInitialLoadingRuleTypes,
     },
   } = useLoadRuleTypesQuery({
     http,
     toasts,
     filteredRuleTypes,
-    staleTime: Infinity, 
+    staleTime: Infinity,
     cacheTime: Infinity,
   });
 
@@ -123,12 +110,23 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     if (id === undefined) {
       return isInitialLoadingUiConfig || isInitialLoadingHealthCheck || isInitialLoadingRuleTypes;
     }
-    return isInitialLoadingUiConfig || isInitialLoadingHealthCheck || isInitialLoadingRule || isInitialLoadingRuleTypes;
-  }, [id, isInitialLoadingUiConfig, isInitialLoadingHealthCheck, isInitialLoadingRule, isInitialLoadingRuleTypes]);
+    return (
+      isInitialLoadingUiConfig ||
+      isInitialLoadingHealthCheck ||
+      isInitialLoadingRule ||
+      isInitialLoadingRuleTypes
+    );
+  }, [
+    id,
+    isInitialLoadingUiConfig,
+    isInitialLoadingHealthCheck,
+    isInitialLoadingRule,
+    isInitialLoadingRuleTypes,
+  ]);
 
   return {
     isLoading,
-    isInitialLoading,
+    isInitialLoading: !!isInitialLoading,
     ruleType,
     ruleTypeModel,
     uiConfig,

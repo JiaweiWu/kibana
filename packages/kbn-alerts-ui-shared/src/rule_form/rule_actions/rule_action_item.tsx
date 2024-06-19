@@ -41,13 +41,24 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertConsumers, RuleCreationValidConsumer, ValidFeatureId } from '@kbn/rule-data-utils';
 import { isEmpty, partition, pick, some } from 'lodash';
 import { ActionVariables } from '@kbn/triggers-actions-ui-types';
-import { RuleFormErrors, RuleUiAction } from '../types';
+import { ActionType } from '@kbn/actions-types';
+import { css } from '@emotion/react';
 import { useRuleFormDispatch, useRuleFormState } from '../hooks';
-import { ActionConnector, ActionType, RuleTypeWithDescription } from '../../common/types';
+import {
+  ActionConnector,
+  RuleFormParamsErrors,
+  RuleTypeWithDescription,
+  RuleUiAction,
+} from '../../common/types';
 import { RuleActionNotifyWhen } from './rule_action_notify_when';
 import { RuleActionAlertsFilter } from './rule_action_alerts_filter';
 import { RuleActionAlertsFilterTimeframe } from './rule_action_alerts_filter_timeframe';
-import { hasFieldsForAad, parseDuration } from '../utils';
+import {
+  getDurationNumberInItsUnit,
+  getDurationUnitValue,
+  hasFieldsForAad,
+  parseDuration,
+} from '../utils';
 import { DEFAULT_VALID_CONSUMERS, MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
 import { useLoadRuleTypeAadTemplateField } from '../../common/hooks';
 
@@ -69,15 +80,6 @@ export interface RuleActionItemProps {
   connectors: ActionConnector[];
   actionTypes: ActionType[];
   validConsumers?: RuleCreationValidConsumer[];
-}
-
-export function getDurationNumberInItsUnit(duration: string): number {
-  return parseInt(duration.replace(/[^0-9.]/g, ''), 10);
-}
-
-export function getDurationUnitValue(duration: string): string {
-  const durationNumber = getDurationNumberInItsUnit(duration);
-  return duration.replace(durationNumber.toString(), '');
 }
 
 const DisabledActionGroupsByActionType: Record<string, string[]> = {
@@ -640,7 +642,7 @@ export const RuleActionItem = (props: RuleActionItemProps) => {
 
   const [queryError, setQueryError] = useState<string | null>(null);
 
-  const [actionParamsErrors, setActionParamsErrors] = useState<{ errors: RuleFormErrors }>({
+  const [actionParamsErrors, setActionParamsErrors] = useState<{ errors: RuleFormParamsErrors }>({
     errors: {},
   });
 
@@ -880,12 +882,12 @@ export const RuleActionItem = (props: RuleActionItemProps) => {
 
   useEffect(() => {
     (async () => {
-      const res: { errors: RuleFormErrors } = await actionTypeRegistry
+      const res: { errors: RuleFormParamsErrors } = await actionTypeRegistry
         .get(actionItem.actionTypeId)
         ?.validateParams(actionItem.params);
       setActionParamsErrors(res);
     })();
-  }, [actionItem]);
+  }, [actionItem, actionTypeRegistry]);
 
   const settingsContent = (
     <EuiFlexGroup direction="column">
@@ -1005,8 +1007,6 @@ export const RuleActionItem = (props: RuleActionItemProps) => {
 
   const ParamsFieldsComponent = actionTypeModel.actionParamsFields;
 
-  console.info('errors', actionParamsErrors.errors);
-
   const messagesContent = (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
@@ -1077,9 +1077,9 @@ export const RuleActionItem = (props: RuleActionItemProps) => {
         },
       }}
       arrowProps={{
-        style: {
-          marginLeft: euiTheme.size.m,
-        },
+        css: css`
+          margin-left: ${euiTheme.size.m};
+        `,
       }}
       extraAction={
         <EuiButtonIcon
@@ -1096,27 +1096,25 @@ export const RuleActionItem = (props: RuleActionItemProps) => {
         <EuiPanel color="subdued" paddingSize="m">
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
-              {showActionGroupErrorIcon() ? 
-                (
-                  <EuiToolTip
-                    content={i18n.translate(
-                      'xpack.triggersActionsUI.sections.actionTypeForm.actionErrorToolTip',
-                      { defaultMessage: 'Action contains errors.' }
-                    )}
-                  >
-                    <EuiIcon
-                      data-test-subj="action-group-error-icon"
-                      type="warning"
-                      color="danger"
-                      size="l"
-                    />
-                  </EuiToolTip>
-                ): (
-                  <Suspense fallback={null}>
-                    <EuiIcon size="l" type={actionTypeModel.iconClass} />
-                  </Suspense>
-                )
-              }
+              {showActionGroupErrorIcon() ? (
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionTypeForm.actionErrorToolTip',
+                    { defaultMessage: 'Action contains errors.' }
+                  )}
+                >
+                  <EuiIcon
+                    data-test-subj="action-group-error-icon"
+                    type="warning"
+                    color="danger"
+                    size="l"
+                  />
+                </EuiToolTip>
+              ) : (
+                <Suspense fallback={null}>
+                  <EuiIcon size="l" type={actionTypeModel.iconClass} />
+                </Suspense>
+              )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText>{connector.name}</EuiText>
@@ -1150,11 +1148,7 @@ export const RuleActionItem = (props: RuleActionItemProps) => {
             )}
             {warning && !isOpen && (
               <EuiFlexItem grow={false}>
-                <EuiBadge
-                  data-test-subj="warning-badge"
-                  iconType="warning"
-                  color="warning"
-                >
+                <EuiBadge data-test-subj="warning-badge" iconType="warning" color="warning">
                   {i18n.translate(
                     'xpack.triggersActionsUI.sections.actionTypeForm.actionWarningsTitle',
                     {

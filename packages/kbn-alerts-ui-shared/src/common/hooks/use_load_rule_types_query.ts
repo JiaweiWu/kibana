@@ -23,8 +23,8 @@ export interface UseRuleTypesProps {
   filteredRuleTypes?: string[];
   registeredRuleTypes?: Array<{ id: string; description: string }>;
   enabled?: boolean;
-  staleTime?: number
-  cacheTime?: number
+  staleTime?: number;
+  cacheTime?: number;
 }
 
 const getFilteredIndex = ({
@@ -113,8 +113,7 @@ export const useLoadRuleTypesQuery = ({
 
   return {
     ruleTypesState: {
-      initialLoad: isLoading || isInitialLoading,
-      isInitialLoading,
+      isInitialLoad: isInitialLoading,
       isLoading: isLoading || isFetching,
       data: filteredIndex,
       error,

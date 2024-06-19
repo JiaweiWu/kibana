@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingElastic } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { RuleFormData, RuleFormPlugins } from './types';
 import { RuleFormStateProvider } from './rule_form_state';
@@ -15,17 +15,23 @@ import { useUpdateRule } from '../common/hooks';
 import { RulePage } from './rule_page';
 import { RuleFormHealthCheckError } from './rule_form_errors/rule_form_health_check_error';
 import { useLoadDependencies } from './hooks/use_load_dependencies';
-import { RuleFormCircuitBreakerError, RuleFormRuleOrRuleTypeError } from './rule_form_errors';
+import {
+  RuleFormCircuitBreakerError,
+  RuleFormErrorPromptWrapper,
+  RuleFormResolveRuleError,
+  RuleFormRuleTypeError,
+} from './rule_form_errors';
 import { RULE_EDIT_ERROR_TEXT, RULE_EDIT_SUCCESS_TEXT } from './translations';
 import { parseRuleCircuitBreakerErrorMessage } from './utils';
 
 export interface EditRuleFormProps {
   id: string;
   plugins: RuleFormPlugins;
+  returnUrl: string;
 }
 
 export const EditRuleForm = (props: EditRuleFormProps) => {
-  const { id, plugins } = props;
+  const { id, plugins, returnUrl } = props;
   const { http, notification, docLinks, ruleTypeRegistry, i18n, theme } = plugins;
   const { toasts } = notification;
 
@@ -62,26 +68,55 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     (newFormData: RuleFormData) => {
       mutate({
         id,
-        formData: newFormData,
+        formData: {
+          name: newFormData.name,
+          tags: newFormData.tags,
+          schedule: newFormData.schedule,
+          params: newFormData.params,
+          // TODO: Will add actions in the actions PR
+          actions: [],
+          notifyWhen: newFormData.notifyWhen,
+          alertDelay: newFormData.alertDelay,
+        },
       });
     },
     [id, mutate]
   );
 
   if (isInitialLoading) {
-    return <EuiLoadingSpinner />;
+    return (
+      <RuleFormErrorPromptWrapper hasBorder={false} hasShadow={false}>
+        <EuiLoadingElastic size="xl" />
+      </RuleFormErrorPromptWrapper>
+    );
   }
 
-  if (!ruleType || !ruleTypeModel || !fetchedFormData) {
-    return <RuleFormRuleOrRuleTypeError />;
+  if (!ruleType || !ruleTypeModel) {
+    return (
+      <RuleFormErrorPromptWrapper hasBorder={false} hasShadow={false}>
+        <RuleFormRuleTypeError />
+      </RuleFormErrorPromptWrapper>
+    );
+  }
+
+  if (!fetchedFormData) {
+    return (
+      <RuleFormErrorPromptWrapper hasBorder={false} hasShadow={false}>
+        <RuleFormResolveRuleError />
+      </RuleFormErrorPromptWrapper>
+    );
   }
 
   if (healthCheckError) {
-    return <RuleFormHealthCheckError error={healthCheckError} docLinks={docLinks} />;
+    return (
+      <RuleFormErrorPromptWrapper>
+        <RuleFormHealthCheckError error={healthCheckError} docLinks={docLinks} />
+      </RuleFormErrorPromptWrapper>
+    );
   }
 
   return (
-    <div>
+    <div data-test-subj="editRuleForm">
       <RuleFormStateProvider
         initialRuleFormState={{
           formData: fetchedFormData,
@@ -92,7 +127,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
           selectedRuleTypeModel: ruleTypeModel,
         }}
       >
-        <RulePage isEdit isSaving={isSaving} onSave={onSave} />
+        <RulePage isEdit={true} isSaving={isSaving} returnUrl={returnUrl} onSave={onSave} />
       </RuleFormStateProvider>
     </div>
   );

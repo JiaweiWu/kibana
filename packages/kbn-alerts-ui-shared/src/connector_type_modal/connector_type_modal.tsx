@@ -28,6 +28,7 @@ import {
   EuiButton,
   EuiLoadingSpinner,
 } from '@elastic/eui';
+import { ActionType } from '@kbn/actions-types';
 import { useRuleFormState } from '../rule_form/hooks';
 import {
   ACTION_TYPE_MODAL_EMPTY_TEXT,
@@ -37,7 +38,7 @@ import {
   MODAL_SEARCH_CLEAR_FILTERS_TEXT,
   MODAL_SEARCH_PLACEHOLDER,
 } from '../rule_form/translations';
-import { ActionConnector, ActionType } from '../common/types';
+import { ActionConnector } from '../common/types';
 
 type ConnectorsMap = Record<string, { actionTypeId: string; name: string; total: number }>;
 
@@ -189,9 +190,9 @@ export const ConnectorTypeModal = (props: ConnectorTypeModalProps) => {
                 layout="horizontal"
                 icon={
                   <div style={{ marginInlineEnd: `16px` }}>
-                  <Suspense fallback={<EuiLoadingSpinner />}>
-                    <EuiIcon size="l" type={actionTypeModel.iconClass} />
-                  </Suspense>
+                    <Suspense fallback={<EuiLoadingSpinner />}>
+                      <EuiIcon size="l" type={actionTypeModel.iconClass} />
+                    </Suspense>
                   </div>
                 }
                 title={name}
